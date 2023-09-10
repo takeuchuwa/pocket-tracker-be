@@ -20,7 +20,7 @@ providers from consumers without the need for DNS.
 
 ### How to start up
 
-It's really easy to start up application with docker.
+It's really easy to start up service with docker.
 Just open root folder and type this commands.
 
 1. Build service
