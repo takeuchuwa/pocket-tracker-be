@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  discovery-service:
+    container_name: discovery
+    build:
+      context: .
+      dockerfile: ./service-discovery/Dockerfile
+    ports:
+      - "8761:8761"
+    networks:
+      - discovery-service
+
+networks:
+  discovery-service:
