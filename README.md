@@ -2,9 +2,10 @@
 Pocket tracker application back end side for 
 finance management.
 
-[1. Discovery Service](#1-discovery-service)
+[1. Discovery Service](#1-discovery-service)  
+[2. Api Gateway](#2-api-gateway)
 
-<h1 id="1-discovery-service">1. Discovery Service</h1>
+# 1. Discovery Service
 
 ## Docker name: discovery-service
 
@@ -25,7 +26,7 @@ Just open root folder and type this commands.
 
 1. Build service
     > docker-compose build discovery-service
-   > 
+
     (use --no-cache if docker cache some processes after pull)
     
     > docker-compose build --no-cache discovery-service
@@ -34,3 +35,37 @@ Just open root folder and type this commands.
     
     > docker-compose up -d discovery-service
 
+After start, you can access it on 
+<a href="http://localhost:8761/" target="_blank">
+localhost:8761
+</a>
+
+# 2. Api Gateway
+
+## Docker name: api-gateway
+
+Entry point of application to direct user to proper service.
+
+Api gateway aims to provide a simple, 
+yet effective way to route to APIs and provide 
+cross cutting concerns to them such as: security, 
+monitoring/metrics, and resiliency.
+
+### How to start up
+
+
+1. Build service
+   > docker-compose build api-gateway
+
+   (use --no-cache if docker cache some processes after pull)
+
+   > docker-compose build --no-cache api-gateway
+
+2. Start up service
+
+   > docker-compose up -d api-gateway
+
+3. **Api Gateway** depends on 
+**[Discovery service](#1-discovery-service)**, so when
+you'll try to start it, discovery service will be built 
+and started also automatically.
