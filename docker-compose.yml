@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  discovery-service:
+    container_name: discovery
+    build:
+      context: .
+      dockerfile: ./service-discovery/Dockerfile
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: "curl --fail --silent localhost:8761/actuator/health | grep UP || exit 1"
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: .
+      dockerfile: ./api-gateway/Dockerfile
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    ports:
+      - "80:80"
