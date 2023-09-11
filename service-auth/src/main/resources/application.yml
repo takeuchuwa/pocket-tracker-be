@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: auth-service
+  profiles:
+    active: '@spring.profiles.active@'
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+server:
+  port: 8081
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: docker
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka
+server:
+  port: 8081
