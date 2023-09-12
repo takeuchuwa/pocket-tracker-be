@@ -1,0 +1,56 @@
+{
+  "properties": [
+    {
+      "name": "com.pockettracker.jwt.claims.id",
+      "defaultValue": "id",
+      "type": "java.lang.String",
+      "description": "Id claims field in jwt token."
+    },
+    {
+      "name": "com.pockettracker.jwt.claims.role",
+      "defaultValue": "role",
+      "type": "java.lang.String",
+      "description": "Role claims field in jwt token."
+    },
+    {
+      "name": "com.pockettracker.jwt.algorithm.key",
+      "defaultValue": "RSA",
+      "type": "java.lang.String",
+      "description": "Sign algorithm for jwt.",
+      "values": [
+        {
+          "value": "RSA"
+        },
+        {
+          "value": "HMAC"
+        }
+      ]
+    },
+    {
+      "name": "com.pockettracker.jwt.algorithm.signature",
+      "defaultValue": "RS256",
+      "type": "java.lang.String",
+      "description": "Sign algorithm for jwt.",
+      "values": [
+        {
+          "value": "RS256"
+        },
+        {
+          "value": "HS256"
+        }
+      ]
+    },
+    {
+      "name": "com.pockettracker.jwt.expirationInMillisecondse",
+      "defaultValue": 1440000,
+      "type": "java.lang.Long",
+      "description": "Sign algorithm for jwt."
+    },
+    {
+      "name": "com.pockettracker.jwt.issuer",
+      "defaultValue": "admin@pockettracker.com",
+      "type": "java.lang.String",
+      "description": "Sign algorithm for jwt."
+    }
+  ]
+}

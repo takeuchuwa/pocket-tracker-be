@@ -10,6 +10,17 @@ spring:
   config:
     activate:
       on-profile: dev
+  datasource:
+    url: jdbc:postgresql://localhost:5432/users
+    username: users_admin
+    password: users_pass
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
 eureka:
   client:
     service-url:
