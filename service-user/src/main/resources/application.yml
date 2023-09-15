@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: user-service
+  profiles:
+    active: '@spring.profiles.active@'
+bcrypt:
+  encoder:
+    strength: 12
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+    import: vault://
+  cloud:
+    vault:
+      database:
+        enabled: true
+        role: user-rw
+        backend: users_postgres
+      authentication: TOKEN
+      host: localhost
+      port: 8200
+      token: e65e2ef0feac46bf9a4ae78cd236c81f
+      scheme: http
+      config:
+        lifecycle:
+          enabled: true
+          min-renewal: 10m
+          expiry-threshold: 1h
+      fail-fast: true
+      kv:
+        backend: pocket_tracker
+  datasource:
+    url: jdbc:postgresql://localhost:5432/users
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+server:
+  port: 8081
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: docker
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka
+server:
+  port: 8081

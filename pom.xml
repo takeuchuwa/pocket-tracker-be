@@ -11,7 +11,7 @@
     <modules>
         <module>service-discovery</module>
         <module>api-gateway</module>
-        <module>service-auth</module>
+        <module>service-user</module>
     </modules>
 
     <dependencyManagement>
