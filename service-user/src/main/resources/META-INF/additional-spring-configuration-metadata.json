@@ -56,6 +56,16 @@
       "name": "bcrypt.encoder.strength",
       "type": "java.lang.Integer",
       "description": "Cost factor for BCrypt encoder."
+    },
+    {
+      "name": "app.redis.host",
+      "type": "java.lang.String",
+      "description": "Pocket tracker redis host."
+    },
+    {
+      "name": "app.redis.port",
+      "type": "java.lang.Integer",
+      "description": "Pocket tracker redis port."
     }
   ]
 }

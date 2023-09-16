@@ -23,7 +23,7 @@ vault write users_postgres/config/postgresql \
 
 vault write users_postgres/roles/user-rw \
 db_name="postgresql" \
-creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; \
+creation_statements="CREATE ROLE \"{{name}}\" WITH SUPERUSER LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; \
                             GRANT ALL ON SCHEMA public TO \"{{name}}\";" \
 default_ttl="1h" \
 max_ttl="24h"
@@ -41,7 +41,7 @@ echo "Initializing vault secrets..."
 vault secrets enable -version=2 -path=pocket_tracker kv
 
 echo "Adding entries..."
-vault kv put pocket_tracker/application jwt.sign.key="-----BEGIN PRIVATE KEY-----
+vault kv put pocket_tracker/application app.jwt.sign.key="-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDAHnI0pfTs+DAe
 qbfSg01Qr+dU91yxS16jLAq7Up/l8+sQfpNwY4YgLDVLjH2bDzFHStDtXYuvc1A0
 rf52gB2Kqn9CwKp7AR9YRNNuCFcXLxXby52mkYtTNVtxEL4ch0blfcoYJZc8Ukd5
@@ -68,7 +68,8 @@ yyofwlHayI35FhcUs60revBR3KppVj+U1PtN23HAsUUGZlkcsk3EyzOQGb6kfa39
 oohgiFWZXZOAlMqcpK+TBxq3Y5/eFHNW1XykGAo5OkM7MkAC2kWLVMj7EP1/qaZY
 b9BDqdhnQgG/WyZFFcSP7+Y0vinkzdYTtnXFn7qDhJANWoOngs5UG2eej/FJcDW0
 9ArNKll96/n+V6MWhbYVXO4=
------END PRIVATE KEY-----"
+-----END PRIVATE KEY-----" \
+app.redis.password="eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81"
 
 echo "Complete secrets..."
 
