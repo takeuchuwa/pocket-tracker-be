@@ -1,4 +1,4 @@
-package com.pockettracker.user.jwt.config;
+package com.pockettracker.jwt.properties;
 
 import lombok.Getter;
 import lombok.Setter;

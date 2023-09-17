@@ -1,5 +1,7 @@
 package com.pockettracker.user.security.config;
 
+import com.pockettracker.jwt.validation.filter.JwtAuthenticationFilter;
+import com.pockettracker.user.auth.util.AuthConstants;
 import com.pockettracker.user.converter.UserResponseToUserDetailsConverter;
 import com.pockettracker.user.entity.User;
 import com.pockettracker.user.repository.UserRepository;
@@ -13,12 +15,16 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 import java.util.Optional;
 
@@ -29,6 +35,8 @@ public class SecurityConfiguration {
 
     private final UserRepository userRepository;
     private final UserResponseToUserDetailsConverter userResponseToUserDetailsConverter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final LogoutHandler logoutHandler;
 
     @Value("${bcrypt.encoder.strength}")
     private int strength;
@@ -37,17 +45,26 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/**")
-                .permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authenticationProvider(authenticationProvider());
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .logout()
+                .logoutUrl("/api/v1/auth/logout")
+                .addLogoutHandler(logoutHandler)
+                .deleteCookies(AuthConstants.AUTH_TOKEN, AuthConstants.REFRESH_TOKEN)
+                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext());
 
         return http.build();
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web.ignoring().requestMatchers("/api/v1/auth/signup", "/api/v1/auth/login");
     }
 
     @Bean
