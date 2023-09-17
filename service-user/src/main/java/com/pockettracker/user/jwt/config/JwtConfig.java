@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 public class JwtConfig {
 
-    @Value("${jwt.sign.key}")
+    @Value("${app.jwt.sign.key}")
     private String jwtSignKey;
 
     private final JwtProperties jwtProperties;
