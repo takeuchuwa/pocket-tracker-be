@@ -1,9 +1,9 @@
 package com.pockettracker.user.auth.service.impl;
 
-import com.pockettracker.user.auth.controller.dto.request.LoginRequest;
-import com.pockettracker.user.auth.controller.dto.request.SignupRequest;
-import com.pockettracker.user.auth.controller.dto.response.AuthenticationResponse;
-import com.pockettracker.user.auth.util.AuthConstants;
+import com.pockettracker.jwt.util.JwtConstants;
+import com.pockettracker.user.auth.controller.dto.LoginRequest;
+import com.pockettracker.user.auth.controller.dto.SignupRequest;
+import com.pockettracker.user.auth.controller.dto.AuthenticationToken;
 import com.pockettracker.user.exception.UserServiceException;
 import com.pockettracker.user.exception.ConflictException;
 import com.pockettracker.user.auth.service.AuthenticationService;
@@ -31,19 +31,19 @@ public record AuthenticationServiceImpl(JwtService jwtService,
                                         PasswordEncoder passwordEncoder) implements AuthenticationService {
 
     @Override
-    public AuthenticationResponse authenticate(LoginRequest loginRequest, HttpServletRequest httpRequest) {
+    public AuthenticationToken authenticate(LoginRequest loginRequest, HttpServletRequest httpRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password()));
         Optional<User> user = userRepository.findUserByUserCredentialsEmail(loginRequest.email());
         if (user.isPresent()) {
             if (isTokenValid(httpRequest, user.get())) {
-                return AuthenticationResponse.builder()
-                        .authToken(findCookie(httpRequest, AuthConstants.AUTH_TOKEN))
-                        .refreshToken(findCookie(httpRequest, AuthConstants.REFRESH_TOKEN))
+                return AuthenticationToken.builder()
+                        .authToken(findCookie(httpRequest, JwtConstants.AUTH_TOKEN))
+                        .refreshToken(findCookie(httpRequest, JwtConstants.REFRESH_TOKEN))
                         .build();
             }
             String jwtToken = jwtService.generateToken(user.get());
             String refreshToken = jwtService.generateJwtRtPair(jwtToken);
-            return AuthenticationResponse.builder()
+            return AuthenticationToken.builder()
                     .authToken(jwtToken)
                     .refreshToken(refreshToken)
                     .build();
@@ -53,7 +53,7 @@ public record AuthenticationServiceImpl(JwtService jwtService,
     }
 
     @Override
-    public AuthenticationResponse signup(SignupRequest signupRequest, HttpServletRequest httpRequest) {
+    public AuthenticationToken signup(SignupRequest signupRequest, HttpServletRequest httpRequest) {
         Optional<User> optionalUser = userRepository.findUserByUserCredentialsEmail(signupRequest.email());
         optionalUser.ifPresentOrElse(user -> {
             throw new ConflictException("User with this email already exists");
@@ -75,12 +75,12 @@ public record AuthenticationServiceImpl(JwtService jwtService,
     }
 
     @Override
-    public AuthenticationResponse refresh(String jwtToken, String refreshToken) {
+    public AuthenticationToken refresh(String jwtToken, String refreshToken) {
         Optional<User> user = userRepository.findUserByUserCredentialsEmail(jwtService.extractUsername(jwtToken));
         if (user.isPresent() && jwtService.isJwtRtPairValid(jwtToken, refreshToken)) {
             String newJwtToken = jwtService.generateToken(user.get());
             String newRefreshToken = jwtService.generateJwtRtPair(newJwtToken);
-            return AuthenticationResponse.builder()
+            return AuthenticationToken.builder()
                     .authToken(newJwtToken)
                     .refreshToken(newRefreshToken)
                     .build();
@@ -90,9 +90,9 @@ public record AuthenticationServiceImpl(JwtService jwtService,
     }
 
     @Override
-    public void addAuthCookies(HttpServletResponse response, AuthenticationResponse auth) {
-        Cookie authToken = new Cookie(AuthConstants.AUTH_TOKEN, auth.authToken());
-        Cookie refreshToken = new Cookie(AuthConstants.REFRESH_TOKEN, auth.refreshToken());
+    public void addAuthCookies(HttpServletResponse response, AuthenticationToken auth) {
+        Cookie authToken = new Cookie(JwtConstants.AUTH_TOKEN, auth.authToken());
+        Cookie refreshToken = new Cookie(JwtConstants.REFRESH_TOKEN, auth.refreshToken());
         authToken.setPath("/");
         refreshToken.setPath("/");
         response.addCookie(authToken);
@@ -100,7 +100,7 @@ public record AuthenticationServiceImpl(JwtService jwtService,
     }
 
     public boolean isTokenValid(HttpServletRequest request, User user) {
-        String jwt = findCookie(request, AuthConstants.AUTH_TOKEN);
+        String jwt = findCookie(request, JwtConstants.AUTH_TOKEN);
         return jwt != null
                 && jwtService.isTokenValid(jwt)
                 && jwtService.extractUsername(jwt).equals(user.getUserCredentials().getEmail());

@@ -24,6 +24,6 @@ public record LogoutService(JwtValidationService jwtValidationService, RedisTemp
             return;
         }
         String jwt = authHeader.substring(JwtConstants.BEARER_TOKEN_START);
-        redisTemplate.opsForValue().getAndDelete(jwtValidationService.extractId(jwt));
+        redisTemplate.opsForValue().getAndDelete(String.valueOf(jwtValidationService.extractUserId(jwt)));
     }
 }

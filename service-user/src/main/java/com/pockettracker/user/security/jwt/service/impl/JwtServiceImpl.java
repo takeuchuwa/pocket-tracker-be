@@ -1,16 +1,19 @@
 package com.pockettracker.user.security.jwt.service.impl;
 
 
+import com.pockettracker.feign.user.AuthFeignClient;
 import com.pockettracker.jwt.properties.JwtProperties;
 import com.pockettracker.jwt.validation.service.impl.JwtValidationServiceImpl;
 import com.pockettracker.user.entity.User;
-import com.pockettracker.user.security.jwt.config.JwtConfig;
+import com.pockettracker.user.security.jwt.config.JwtPrivateConfig;
+import com.pockettracker.user.security.jwt.entity.JwtRtPair;
 import com.pockettracker.user.security.jwt.service.JwtService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.util.io.pem.PemObject;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -26,15 +29,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@Service
+@Service("extendedJwtService")
+@Primary
 @Slf4j
 public class JwtServiceImpl extends JwtValidationServiceImpl implements JwtService {
 
-    private final JwtConfig jwtConfig;
-    private final RedisTemplate<String, String> redisTemplate;
+    private final JwtPrivateConfig jwtConfig;
+    private final RedisTemplate<String, JwtRtPair> redisTemplate;
 
-    public JwtServiceImpl(JwtConfig jwtConfig, RedisTemplate<String, String> redisTemplate, JwtProperties jwtProperties) {
-        super(jwtConfig.getJwtPublicKey(), jwtProperties);
+    public JwtServiceImpl(JwtPrivateConfig jwtConfig, RedisTemplate<String, JwtRtPair> redisTemplate, JwtProperties jwtProperties, AuthFeignClient authFeignClient) {
+        super(jwtProperties, authFeignClient);
         this.jwtConfig = jwtConfig;
         this.redisTemplate = redisTemplate;
     }
@@ -55,15 +59,18 @@ public class JwtServiceImpl extends JwtValidationServiceImpl implements JwtServi
 
     @Override
     public String generateJwtRtPair(String jwtToken) {
-        String refreshToken = UUID.randomUUID().toString();
-        redisTemplate.opsForValue().set(extractId(jwtToken), refreshToken);
-        return refreshToken;
+        JwtRtPair jwtRtPair = JwtRtPair.builder()
+                .jwtId(extractId(jwtToken))
+                .refreshToken(UUID.randomUUID().toString())
+                .build();
+        redisTemplate.opsForValue().set(String.valueOf(extractUserId(jwtToken)), jwtRtPair);
+        return jwtRtPair.getRefreshToken();
     }
 
     @Override
     public boolean isJwtRtPairValid(String jwtToken, String refreshToken) {
-        String rt = redisTemplate.opsForValue().getAndDelete(extractId(jwtToken));
-        return rt != null && rt.equals(refreshToken);
+        JwtRtPair rt = redisTemplate.opsForValue().getAndDelete(String.valueOf(extractUserId(jwtToken)));
+        return rt != null && rt.getRefreshToken().equals(refreshToken);
     }
 
     private Map<String, Object> populateClaims(User user) {
