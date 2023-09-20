@@ -3,12 +3,10 @@ package com.pockettracker.jwt.validation.service.impl;
 import com.pockettracker.feign.user.AuthFeignClient;
 import com.pockettracker.feign.user.dto.JwtRefreshTokenPair;
 import com.pockettracker.jwt.properties.JwtProperties;
-import com.pockettracker.jwt.util.JwtConstants;
 import com.pockettracker.jwt.validation.service.JwtValidationService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.util.io.pem.PemObject;
@@ -27,7 +25,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 @Slf4j
