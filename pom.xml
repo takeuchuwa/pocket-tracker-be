@@ -12,7 +12,8 @@
         <module>service-discovery</module>
         <module>api-gateway</module>
         <module>service-user</module>
-        <module>jwt-validation</module>
+        <module>jwt-validation-lib</module>
+        <module>feign-clients-lib</module>
     </modules>
 
     <dependencyManagement>

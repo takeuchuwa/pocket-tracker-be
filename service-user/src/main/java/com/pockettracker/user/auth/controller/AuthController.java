@@ -1,10 +1,9 @@
 package com.pockettracker.user.auth.controller;
 
-import com.pockettracker.user.auth.controller.dto.request.LoginRequest;
-import com.pockettracker.user.auth.controller.dto.request.SignupRequest;
-import com.pockettracker.user.auth.controller.dto.response.AuthenticationResponse;
+import com.pockettracker.user.auth.controller.dto.AuthenticationToken;
+import com.pockettracker.user.auth.controller.dto.LoginRequest;
+import com.pockettracker.user.auth.controller.dto.SignupRequest;
 import com.pockettracker.user.auth.service.AuthenticationService;
-import com.pockettracker.user.auth.util.AuthConstants;
 import com.pockettracker.user.exception.response.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,8 +16,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,11 +34,11 @@ public record AuthController(AuthenticationService authenticationService) {
             @ApiResponse(responseCode = "400", description = "Not valid email",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class))}),
-            @ApiResponse(responseCode = "403", description = "Wrong email or password")
+            @ApiResponse(responseCode = "403", description = "Wrong email or password", content = {@Content()})
     })
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletRequest httpRequest, HttpServletResponse response) {
-        AuthenticationResponse auth = authenticationService.authenticate(loginRequest, httpRequest);
+    public ResponseEntity<AuthenticationToken> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletRequest httpRequest, HttpServletResponse response) {
+        AuthenticationToken auth = authenticationService.authenticate(loginRequest, httpRequest);
         authenticationService.addAuthCookies(response, auth);
         return ResponseEntity.ok(auth);
     }
@@ -51,22 +48,23 @@ public record AuthController(AuthenticationService authenticationService) {
             @ApiResponse(responseCode = "400", description = "Not valid request(some value is missing or not valid)",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class))}),
-            @ApiResponse(responseCode = "409", description = "User with this email already exists")
+            @ApiResponse(responseCode = "409", description = "User with this email already exists", content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponse.class))})
     })
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<AuthenticationResponse> signup(@RequestBody @Valid SignupRequest signupRequest, HttpServletRequest httpRequest, HttpServletResponse response) throws URISyntaxException {
-        AuthenticationResponse auth = authenticationService.signup(signupRequest, httpRequest);
+    public ResponseEntity<AuthenticationToken> signup(@RequestBody @Valid SignupRequest signupRequest, HttpServletRequest httpRequest, HttpServletResponse response) throws URISyntaxException {
+        AuthenticationToken auth = authenticationService.signup(signupRequest, httpRequest);
         authenticationService.addAuthCookies(response, auth);
         return ResponseEntity.status(HttpStatus.CREATED).body(auth);
     }
 
-    @GetMapping("/refresh")
+    @PostMapping(value = "/refresh", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Refresh JWT token when", responses = {
-            @ApiResponse(responseCode = "400", description = "Cookies is not present")
+            @ApiResponse(responseCode = "400", description = "Body is not present", content = {@Content()})
     })
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<AuthenticationResponse> refresh(@CookieValue(AuthConstants.AUTH_TOKEN) String jwtToken, @CookieValue(AuthConstants.REFRESH_TOKEN) String refreshToken, HttpServletResponse response) {
-        AuthenticationResponse auth = authenticationService.refresh(jwtToken, refreshToken);
+    public ResponseEntity<AuthenticationToken> refresh(@RequestBody AuthenticationToken authenticationToken, HttpServletResponse response) {
+        AuthenticationToken auth = authenticationService.refresh(authenticationToken.authToken(), authenticationToken.refreshToken());
         authenticationService.addAuthCookies(response, auth);
         return ResponseEntity.ok(auth);
     }

@@ -31,7 +31,7 @@ import lombok.Setter;
 public class User {
 
     @Id
-    @SequenceGenerator(name = "user_id_sequence", sequenceName = "user_id_sequence")
+    @SequenceGenerator(name = "user_id_sequence", sequenceName = "user_id_sequence", initialValue = 1000)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_sequence")
     @Column(name = "user_id")
     private Long userId;
