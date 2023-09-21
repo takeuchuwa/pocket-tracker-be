@@ -1,8 +1,8 @@
 package com.pockettracker.user.auth.service;
 
+import com.pockettracker.user.auth.controller.dto.AuthenticationToken;
 import com.pockettracker.user.auth.controller.dto.LoginRequest;
 import com.pockettracker.user.auth.controller.dto.SignupRequest;
-import com.pockettracker.user.auth.controller.dto.AuthenticationToken;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 

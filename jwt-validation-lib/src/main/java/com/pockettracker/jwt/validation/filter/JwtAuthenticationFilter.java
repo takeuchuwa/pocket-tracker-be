@@ -4,7 +4,6 @@ import com.pockettracker.jwt.util.JwtConstants;
 import com.pockettracker.jwt.validation.service.JwtValidationService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 @RequiredArgsConstructor
 @Component
@@ -38,18 +36,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         String jwt = authHeader.substring(JwtConstants.BEARER_TOKEN_START);
         String userEmail = jwtService.extractUsername(jwt);
-        String refreshToken = null;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            refreshToken = Arrays.stream(cookies)
-                    .filter(c -> c.getName().equals(JwtConstants.REFRESH_TOKEN))
-                    .findFirst()
-                    .map(Cookie::getValue)
-                    .orElse(null);
-        }
+
         if (userEmail != null
                 && SecurityContextHolder.getContext().getAuthentication() == null
-                && jwtService.isTokenValid(jwt, refreshToken)) {
+                && jwtService.isTokenValid(jwt)) {
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     userEmail,
                     null,
@@ -61,5 +51,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
         filterChain.doFilter(request, response);
+
     }
 }

@@ -10,8 +10,6 @@ public interface JwtValidationService {
 
     boolean isTokenValid(String token);
 
-    boolean isTokenValid(String token, String cookies);
-
     Claims extractAllClaims(String token);
 
     String extractUsername(String token);

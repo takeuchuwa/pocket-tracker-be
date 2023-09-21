@@ -13,6 +13,8 @@ public class JwtProperties {
 
     private Long expirationInMilliseconds = 1000 * 60 * 60 * 24L; // 1 day default
 
+    private Long refreshExpirationInMilliseconds = 1000 * 60 * 60 * 24 * 7L; // 7 day default
+
     private final Claims claims;
 
     private final Algorithm algorithm;

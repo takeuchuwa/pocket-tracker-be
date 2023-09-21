@@ -1,7 +1,6 @@
 package com.pockettracker.user.security.jwt.service.impl;
 
 
-import com.pockettracker.feign.user.AuthFeignClient;
 import com.pockettracker.jwt.properties.JwtProperties;
 import com.pockettracker.jwt.validation.service.impl.JwtValidationServiceImpl;
 import com.pockettracker.user.entity.User;
@@ -24,6 +23,7 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,8 +37,8 @@ public class JwtServiceImpl extends JwtValidationServiceImpl implements JwtServi
     private final JwtPrivateConfig jwtConfig;
     private final RedisTemplate<String, JwtRtPair> redisTemplate;
 
-    public JwtServiceImpl(JwtPrivateConfig jwtConfig, RedisTemplate<String, JwtRtPair> redisTemplate, JwtProperties jwtProperties, AuthFeignClient authFeignClient) {
-        super(jwtProperties, authFeignClient);
+    public JwtServiceImpl(JwtPrivateConfig jwtConfig, RedisTemplate<String, JwtRtPair> redisTemplate, JwtProperties jwtProperties) {
+        super(jwtProperties);
         this.jwtConfig = jwtConfig;
         this.redisTemplate = redisTemplate;
     }
@@ -63,7 +63,9 @@ public class JwtServiceImpl extends JwtValidationServiceImpl implements JwtServi
                 .jwtId(extractId(jwtToken))
                 .refreshToken(UUID.randomUUID().toString())
                 .build();
-        redisTemplate.opsForValue().set(String.valueOf(extractUserId(jwtToken)), jwtRtPair);
+        String key = String.valueOf(extractUserId(jwtToken));
+        redisTemplate.opsForValue().set(key, jwtRtPair);
+        redisTemplate.expireAt(key, Instant.ofEpochMilli(System.currentTimeMillis() + getJwtProperties().getRefreshExpirationInMilliseconds()));
         return jwtRtPair.getRefreshToken();
     }
 

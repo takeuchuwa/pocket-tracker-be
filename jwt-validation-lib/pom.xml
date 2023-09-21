@@ -51,6 +51,7 @@
             <groupId>com.pockettracker</groupId>
             <artifactId>feign-clients-lib</artifactId>
             <version>0.0.1</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

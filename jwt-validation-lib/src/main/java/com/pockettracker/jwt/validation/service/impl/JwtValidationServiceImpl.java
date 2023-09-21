@@ -1,7 +1,5 @@
 package com.pockettracker.jwt.validation.service.impl;
 
-import com.pockettracker.feign.user.AuthFeignClient;
-import com.pockettracker.feign.user.dto.JwtRefreshTokenPair;
 import com.pockettracker.jwt.properties.JwtProperties;
 import com.pockettracker.jwt.validation.service.JwtValidationService;
 import io.jsonwebtoken.Claims;
@@ -36,35 +34,13 @@ public class JwtValidationServiceImpl implements JwtValidationService {
 
     private JwtProperties jwtProperties;
 
-    private AuthFeignClient authFeignClient;
-
-    public JwtValidationServiceImpl(JwtProperties jwtProperties, AuthFeignClient authFeignClient) {
+    public JwtValidationServiceImpl(JwtProperties jwtProperties) {
         this.jwtProperties = jwtProperties;
-        this.authFeignClient = authFeignClient;
     }
 
     @Override
     public boolean isTokenValid(String token) {
         return !isTokenExpired(token);
-    }
-
-    @Override
-    public boolean isTokenValid(String token, String refreshToken) {
-        boolean tokenValid = isTokenValid(token);
-        if (!tokenValid) {
-            tokenValid = isTokenValid(refreshToken(token, refreshToken));
-        }
-        return tokenValid;
-
-    }
-
-    private String refreshToken(String token, String refreshToken) {
-        JwtRefreshTokenPair refreshRequest = JwtRefreshTokenPair.builder()
-                .authToken(token)
-                .refreshToken(refreshToken)
-                .build();
-        JwtRefreshTokenPair newJwtRtPair = authFeignClient.refresh(refreshRequest);
-        return newJwtRtPair.authToken();
     }
 
     @Override

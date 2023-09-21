@@ -1,8 +1,8 @@
 package com.pockettracker.user.converter;
 
 
-import com.pockettracker.user.security.UserDetailsImpl;
 import com.pockettracker.user.entity.User;
+import com.pockettracker.user.security.UserDetailsImpl;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,18 +1,19 @@
 package com.pockettracker.user.auth.service.impl;
 
 import com.pockettracker.jwt.util.JwtConstants;
+import com.pockettracker.user.auth.controller.dto.AuthenticationToken;
 import com.pockettracker.user.auth.controller.dto.LoginRequest;
 import com.pockettracker.user.auth.controller.dto.SignupRequest;
-import com.pockettracker.user.auth.controller.dto.AuthenticationToken;
-import com.pockettracker.user.exception.UserServiceException;
-import com.pockettracker.user.exception.ConflictException;
 import com.pockettracker.user.auth.service.AuthenticationService;
 import com.pockettracker.user.entity.User;
 import com.pockettracker.user.entity.UserCredentials;
 import com.pockettracker.user.entity.UserInformation;
 import com.pockettracker.user.entity.enums.Role;
-import com.pockettracker.user.security.jwt.service.JwtService;
+import com.pockettracker.user.exception.ConflictException;
+import com.pockettracker.user.exception.GoneException;
+import com.pockettracker.user.exception.UserServiceException;
 import com.pockettracker.user.repository.UserRepository;
+import com.pockettracker.user.security.jwt.service.JwtService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -85,7 +86,7 @@ public record AuthenticationServiceImpl(JwtService jwtService,
                     .refreshToken(newRefreshToken)
                     .build();
         } else {
-            throw new UserServiceException();
+            throw new GoneException("Token pair is expired");
         }
     }
 

@@ -16,6 +16,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,7 +36,7 @@ public record AuthController(AuthenticationService authenticationService) {
             @ApiResponse(responseCode = "400", description = "Not valid email",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class))}),
-            @ApiResponse(responseCode = "403", description = "Wrong email or password", content = {@Content()})
+            @ApiResponse(responseCode = "401", description = "Wrong email or password", content = {@Content()})
     })
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<AuthenticationToken> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletRequest httpRequest, HttpServletResponse response) {
@@ -58,15 +60,22 @@ public record AuthController(AuthenticationService authenticationService) {
         return ResponseEntity.status(HttpStatus.CREATED).body(auth);
     }
 
-    @PostMapping(value = "/refresh", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Refresh JWT token when", responses = {
-            @ApiResponse(responseCode = "400", description = "Body is not present", content = {@Content()})
+            @ApiResponse(responseCode = "400", description = "Cookie is not present", content = {@Content()}),
+            @ApiResponse(responseCode = "410", description = "Refresh token expired",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class))})
     })
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<AuthenticationToken> refresh(@RequestBody AuthenticationToken authenticationToken, HttpServletResponse response) {
-        AuthenticationToken auth = authenticationService.refresh(authenticationToken.authToken(), authenticationToken.refreshToken());
+    public ResponseEntity<AuthenticationToken> refresh(@CookieValue String authToken, @CookieValue String refreshToken, HttpServletResponse response) {
+        AuthenticationToken auth = authenticationService.refresh(authToken, refreshToken);
         authenticationService.addAuthCookies(response, auth);
         return ResponseEntity.ok(auth);
     }
 
+    @GetMapping("/secure")
+    public ResponseEntity<String> secure() {
+        return ResponseEntity.ok("ok");
+    }
 }
