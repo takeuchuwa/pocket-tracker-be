@@ -9,6 +9,7 @@ finance management.
 [3. Services](#3-services)  
 &nbsp;&nbsp;&nbsp;&nbsp;[3.1 Discovery Service](#31-discovery-service)  
 &nbsp;&nbsp;&nbsp;&nbsp;[3.2 Api Gateway](#32-api-gateway)  
+&nbsp;&nbsp;&nbsp;&nbsp;[3.3 User Service](#33-user-service)  
 [4. Non-service containers](#4-non-service-containers)  
 &nbsp;&nbsp;&nbsp;&nbsp;[4.1 PostgreSQL](#41-postgresql-users-db)  
 &nbsp;&nbsp;&nbsp;&nbsp;[4.2 Redis](#42-redis-user-db)  
