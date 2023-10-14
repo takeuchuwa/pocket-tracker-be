@@ -13,6 +13,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 40s
+    networks:
+      - webnet
 
   api-gateway:
     container_name: api-gateway
@@ -24,6 +26,32 @@ services:
         condition: service_healthy
     ports:
       - "80:80"
+    networks:
+      - webnet
+
+  service-user:
+    container_name: service-user
+    build:
+      context: .
+      dockerfile: ./service-user/Dockerfile
+    depends_on:
+      vault-server:
+        condition: service_started
+      discovery-service:
+        condition: service_healthy
+      users-db:
+        condition: service_healthy
+      jwt-rt-redis-db:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    deploy:
+      endpoint_mode: dnsrr
+    networks:
+      - webnet
+      - vault-network
+      - postgres
+      - jwt-redis
 
   users-db:
     container_name: users-db
@@ -40,6 +68,12 @@ services:
     networks:
       - postgres
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   pgadmin:
     container_name: pgadmin
@@ -98,14 +132,26 @@ services:
     volumes:
       - jwt-rt-redis:/data
     restart: unless-stopped
+    networks:
+      - jwt-redis
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
 networks:
+  webnet:
+    driver: bridge
   postgres:
     driver: bridge
   vault-network:
     ipam:
       config:
         - subnet: 172.21.0.0/24
+  jwt-redis:
+    driver: bridge
 volumes:
   postgres:
   pgadmin:

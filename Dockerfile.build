@@ -1,0 +1,9 @@
+FROM maven:3.8.4-openjdk-17 AS deps
+WORKDIR /app
+COPY ./pom.xml /app/.
+COPY ./api-gateway /app/api-gateway/.
+COPY ./feign-clients-lib /app/feign-clients-lib/.
+COPY ./jwt-validation-lib /app/jwt-validation-lib/.
+COPY ./service-discovery /app/service-discovery/.
+COPY ./service-user /app/service-user/.
+RUN mvn clean install

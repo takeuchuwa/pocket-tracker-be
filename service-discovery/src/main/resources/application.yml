@@ -24,7 +24,7 @@ server:
 spring:
   config:
     activate:
-      on-profile: docker
+      on-profile: dockerdev
 eureka:
   instance:
     hostname: localhost
