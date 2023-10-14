@@ -54,8 +54,43 @@ server:
 spring:
   config:
     activate:
-      on-profile: docker
+      on-profile: dockerdev
+    import: vault://
+  cloud:
+    vault:
+      database:
+        enabled: true
+        role: user-rw
+        backend: users_postgres
+      authentication: TOKEN
+      host: vault-server
+      port: 8200
+      token: e65e2ef0feac46bf9a4ae78cd236c81f
+      scheme: http
+      config:
+        lifecycle:
+          enabled: true
+          min-renewal: 10m
+          expiry-threshold: 1h
+      fail-fast: true
+      kv:
+        backend: pocket_tracker
+  datasource:
+    url: jdbc:postgresql://users-db:5432/users
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+app:
+  redis:
+    host: jwt-rt-redis-db
 eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: discovery-service
   client:
     service-url:
       defaultZone: http://discovery-service:8761/eureka

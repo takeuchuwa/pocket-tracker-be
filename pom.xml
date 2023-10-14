@@ -92,9 +92,9 @@
             </properties>
         </profile>
         <profile>
-            <id>docker</id>
+            <id>dockerdev</id>
             <properties>
-                <spring.profiles.active>docker</spring.profiles.active>
+                <spring.profiles.active>dockerdev</spring.profiles.active>
             </properties>
         </profile>
     </profiles>
